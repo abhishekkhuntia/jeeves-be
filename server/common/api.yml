@@ -123,6 +123,10 @@ definitions:
         type: array
         items:
           type: string
+      relatedPostIds:
+        type: array
+        items:
+          type: string
   Post:
     type: object
     required:
@@ -155,6 +159,23 @@ definitions:
         type: array
         items:
           $ref: "#/definitions/Comment"
+  CreatePostRequest:
+    type: object
+    required:
+      - postName
+      - content
+      - topicId
+      - published
+    properties:
+      postName:
+        type: string
+      content:
+        type: string
+        description: html content for post
+      topicId:
+        type: string
+      published:
+        type: boolean
   Comment:
     type: object
     required:
@@ -204,6 +225,41 @@ paths:
           description: User sign up successful
         404:
           description: Example not found
+  /content/post:
+    post:
+      security:
+          - Bearer: []
+      x-security-scopes:
+        - SUPER-ADMIN
+        - OWNER
+        - ADMIN
+      parameters:
+        - name: post
+          in: body
+          description: Post content
+          required: true
+          schema:
+            $ref: "#/definitions/CreatePostRequest"
+      responses:
+        200:
+          description: Post creation
+    get:
+      security:
+          - Bearer: []
+      x-security-scopes:
+        - SUPER-ADMIN
+        - OWNER
+        - ADMIN
+      parameters:
+        - in: query
+          name: offset
+          type: integer
+        - in: query
+          name: limit
+          type: integer
+      responses:
+        200:
+          description: Returns the list of posts with pagination
   /content/topic:
     get:
       security:

@@ -5,6 +5,7 @@ import http from 'http';
 import os from 'os';
 import cookieParser from 'cookie-parser';
 import l from './logger';
+import AuthMemCache from './auth-memcache';
 
 import installValidator from './swagger';
 
@@ -35,7 +36,10 @@ export default class ExpressServer {
   async attachClient(){
     const client = await mongoClient();
     app.set('db', client.db('jeeves'));
-    l.info('Mongo connected')
+    l.info('Mongo connected');
+
+    const authMemCache = new AuthMemCache();
+    app.set('authCache', authMemCache);
   }
 
   listen(port: number): Application {

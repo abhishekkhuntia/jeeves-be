@@ -13,8 +13,13 @@ const verifyTokenV2 = (req: Request, res: Response, next: Function) => {
         if(!token || !token.length || !token.startsWith('Bearer')){
             return sendError();
         }
-        const currentScopes = swagger.operation['x-security-scopes'];
         let tokenString = token.split(" ")[1];
+        const authCache = req.app.get('authCache');
+        const cacheMem = authCache.get(tokenString)
+        if(!cacheMem){
+            return sendError();
+        }
+        const currentScopes = swagger.operation['x-security-scopes'];
         jwt.verify(tokenString, sharedSecret, function(
             verificationError: Error,
             decodedToken: any

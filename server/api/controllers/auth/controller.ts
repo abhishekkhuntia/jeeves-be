@@ -26,13 +26,19 @@ class AuthController {
                     if(await passwordUtil.isMatchingPassword(payload.password, authUser.password)) {
                         const expiration = new Date();
                         expiration.setDate(expiration.getDate() + 30); // 30 days expiration
+                        const authCache = req.app.get('authCache');
+                        const newToken = auth.issueToken(user.userName, user.role, user.userId, expiration.toUTCString());
+                        authCache.put(newToken, {
+                            uid: authUser.uid,
+                            expiration: expiration.toUTCString()
+                        });
                         return res.status(200)
                                 .json({
                                     user: {
                                         ...user,
                                         userId: authUser.uid
                                     },
-                                    token: auth.issueToken(user.userName, user.role, user.userId, expiration.toUTCString())
+                                    token: newToken
                                 });
                     } else {
                         return res.status(403).json({message: 'Invalid combination of emailId and password'});
@@ -83,13 +89,20 @@ class AuthController {
                     expiration.setDate(expiration.getDate() + 30); // 30 days expiration
                     emailUtil.sendInvitationMail(payload.userName, payload.emailId)
                     delete payload.password;
+                    
+                    const newToken = auth.issueToken(payload.userName, 'ADMIN', uid, expiration.toUTCString())
+                    const authCache = req.app.get('authCache');
+                    authCache.put(newToken, {
+                        uid,
+                        expiration: expiration.toUTCString()
+                    });
                     return res.status(200)
                             .json({
                                 user: {
                                     ...payload,
                                     userId: uid
                                 },
-                                token: auth.issueToken(payload.userName, 'ADMIN', uid, expiration.toUTCString())
+                                token: newToken
                             })
                 } else{
                     throw new Error('Error creating the user');

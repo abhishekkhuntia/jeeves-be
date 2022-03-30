@@ -1,6 +1,10 @@
 import express from 'express';
-import controller from './topicController';
+import topicController from './topicController';
+import postController from './postController';
+
 export default express.Router()
-                .get('/topic', controller.getTopicsByPagination)
-                .post('/topic', controller.createTopic);
+                .get('/topic', topicController.getTopicsByPagination)
+                .post('/topic', topicController.createTopic)
+                .get('/post', postController.getPostsByPagination)
+                .post('/post', postController.createPost);
                 
